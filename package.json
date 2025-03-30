@@ -1,0 +1,25 @@
+{
+  "name": "web-security",
+  "version": "1.0.0",
+  "description": "Checking valid url",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon Server/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/methea15/Web_Security/issues"
+  },
+  "homepage": "https://github.com/methea15/Web_Security#readme",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.13.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
