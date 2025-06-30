@@ -1,5 +1,5 @@
+//codesistency--bootcamp
 import mongoose from "mongoose"
-
 
 export const database = async () => {
     try {

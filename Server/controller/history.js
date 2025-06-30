@@ -1,55 +1,75 @@
 import mongoose from "mongoose";
-import History from "../schema/history_model.js";
+import UrlCheck from "../schema/url_model.js";
+//history save after getting url
 
-export const getHistory = async (req, res) => {
-    try {
-        const histories = await History.find({});
-        res.status(200).json({ success: true, data: histories })
-    } catch (error) {
-        console.log("Error in getting histories:", error.message);
-        res.status(500).json({ success: false, message: "Server error" });
-        
-    }
+export const contentSchema = (item) => {
+    return item.map(data => ({
+        id: data._id,
+        url: data.url,
+        status: data.status,
+        info: data.details,
+        check_at: data.check_at,
+        action: data._id
+    }))
 }
-
-export const createHistory = async (req, res) => {
-    const {user_id, url_id} = req.body;
-    if (!user_id || !url_id) {
-        return res.status(400).json({ success: false, message: "Please provide this field" });
-    }
-    const newHistory = new History({user_id, url_id});
+//work
+export const getHistories = async (req, res) => {
     try {
-        await newHistory.save();
-        res.status(201).json({ success: true, data: newHistory });
+        const url = await UrlCheck.find({});
+        const data = contentSchema(url)
+        res.status(200).json({ success: true, data: data })
     } catch (error) {
-        console.error("Error message", error.message);
-        res.status(500).json({ success: false, message: "server error" });
-    }
-}
-
-export const updateHistory = async (req, res) => {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        res.status(404).json({ success: false, message: "Server error" });
-    }
-
-    try {
-        const updatedHistory = await History.findByIdAndUpdate(id);
-        res.status(200).json({ success: true, data: updatedHistory });
-    } catch (error) {
-        console.log("Error in deleting histories:", error.message);
+        console.log("Error in get:", error.message);
         res.status(500).json({ success: false, message: "Server error" });
     }
 }
-   
-export const deleteHistory = async (req, res) => {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        res.status(404).json({ success: false, message: "Server error" });
+//work
+export const createHistories = async (req, res) => {
+    const { url, status } = req.body;
+    if (!url || !status) {
+        throw new Error("invalid data format");
     }
     try {
-        await History.findByIdAndDelete(id);
-        res.status(200).json({ success: true, message: "History deleted" });
+        const newURL = await UrlCheck.create({url, status});
+        res.status(200).json({ success: true, data: newURL });  
+    } catch (error) {
+        console.error("Error message in create history", error.message);
+    }  
+}
+//work
+export const updateHistories = async (req, res) => {
+    const { id } = req.params;
+    const updateData = req.body;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400).json({ success: false, message: "Server error" });
+    }
+    try {
+        const updatedURL = await UrlCheck.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            { new: true, upsert: true }
+        );
+        if (!updatedURL) {
+            return res.status(404).json({ success: false, message: "URL is not found" });
+        }
+        res.status(200).json({ success: true, data: updatedURL });
+    } catch (error) {
+        console.log("Error in update:", error.message);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+//work
+export const deleteHistories = async (req, res) => {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ success: false, message: "Server error" });
+    }
+    try {
+        const deleteURL = await UrlCheck.findByIdAndDelete(id);
+        if (!deleteURL) {
+            return res.status(404).json({ success: false, message: "URL not found" });
+        }
+        res.status(200).json({ success: true, message: "URL deleted" });
     } catch (error) {
         console.log("Error in deleting histories:", error.message);
         res.status(500).json({ success: false, message: "Server error" });

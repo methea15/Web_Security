@@ -1,16 +1,10 @@
 import mongoose from "mongoose";
-
-
+//just change
 const urlSchema = new mongoose.Schema({
     url: {
         type: String,
-        required: true
-    },
-    threat_type: {
-        type: String
-    },
-    source: {
-        type: String
+        required: true,
+        unique: true
     },
     status: {
         type: String,
@@ -19,21 +13,34 @@ const urlSchema = new mongoose.Schema({
     },
     checked_at: {
         type: Date,
-        default: Date.now
+        default: Date.now,
     },
-    additional_info: {
-        phishing_score: {
-            type: Number
+    details: {
+        description: String,
+        analysis: {
+            protocol: {
+                type: String,
+                enum: ['HTTP', 'HTTPS']
+            },
+            domain: {
+                name: String, 
+                message: String
+            }
+           },
+        source: {
+            google: {
+                threatTypes: [String],
+                expireTime: Date,
+            },
+            virusTotal: [{
+                method: String,
+               engine_name: String,
+               category: String,
+               result: String
+            }]
         },
-        detection_source: {
-            type: [String]
-        },
-        details: {
-            type: String
-        }
     }
-
 });
 
 const UrlCheck = mongoose.model('UrlCheck', urlSchema);
-export default UrlCheck;
+export default UrlCheck; 

@@ -4,14 +4,22 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google-cloud/web-risk": "^5.0.1",
+    "@react-icons/all-files": "^4.1.0",
+    "axios": "^1.9.0",
+    "bootstrap": "^5.3.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-bootstrap": "^2.10.9",
+    "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.4.1",
+    "zustand": "^5.0.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

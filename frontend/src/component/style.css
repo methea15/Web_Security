@@ -1,0 +1,30 @@
+.btn-link:hover{
+color: red;
+transition: 0.4s ease-in-out ;
+text-decoration: none;
+}
+.btn-link:visited{
+    color: rgb(112, 32, 112);
+}
+
+/* url style */
+#urlBox{
+    display: flex;
+    padding: 10rem;
+    justify-self: center;
+}
+
+.url_box{
+    padding: 1em;
+    margin: 1em;
+    width: 50vw;
+    border-radius: 2rem;    
+}
+.btn1 {
+        display: flex;
+        border-radius: 2rem;
+        padding: 1rem;
+        margin: 1rem;
+        text-align: center;
+        background-color: #4965b2;
+}
