@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-
+//not use anymore
 const historySchema = new mongoose.Schema({
     user_id: {
         type: Number,
