@@ -2,19 +2,21 @@ import React, {  useState } from 'react'
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.png';
-import { authUser } from '../function/auth';
+import { authUser } from '../component/auth.js';
 import "../component/style.css"
  
 const SignIn = ()=> {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const {login, isLoading, error} = authUser()
+  const { login, isLoading, error } = authUser();
+  const navigator = useNavigate();
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await login(email, password);
+      navigator('/')
     } catch (error) {
       console.log(error);
     }
@@ -30,18 +32,14 @@ const SignIn = ()=> {
           <span className='text-dark fw-bold fs-10 d-flex flex-column'>Romdoul Security</span>
           </Link>
           <h2 className='d-flex justify-content-center'>Login</h2>
-
         </div>
 
-        <FloatingLabel
-          
+        <FloatingLabel          
         controlId="floatingInput"
-        label="Email address"
-        className="mb-3"
-      >
-          <Form.Control
-            
-            type="email" value={email} placeholder="name@example.com"
+        label="Email address" 
+        className="mb-3">
+          <Form.Control            
+          type="email" value={email} placeholder="name@example.com"
         onChange={(e)=> setEmail(e.target.value)}  />
       </FloatingLabel>
       

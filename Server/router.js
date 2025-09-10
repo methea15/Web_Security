@@ -12,7 +12,7 @@ const limiter = rateLimit({
     legacyHeaders: false
 });
 //histories
-router.get("/histories", getHistories);
+router.get("/histories", verifyToken, getHistories);
 router.post("/histories", limiter, createHistories);
 router.put("/histories/:id",limiter, updateHistories);
 router.delete("/histories/:id",limiter, deleteHistories);
@@ -26,7 +26,7 @@ router.post("/login", logIn);
 router.post("/logout", logOut);
 //not working
 router.get("/checking", verifyToken, checking);
-router.get("/user", verifyToken, getUser);
+router.get("/user", getUser);
 router.put("/user/:id", verifyToken, updateUser);
 router.delete("/user/:id", verifyToken, deleteUser);
 

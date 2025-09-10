@@ -4,15 +4,22 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 //create token that expire in 30 days
-const generateToken = (userId) => {
-    return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "30d" });
+const generateToken = (res, userId) => {
+    const token =  jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "30d" });
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE.ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 *60 *1000,
+    });
+    return token;
 }
 //middleware validate jwt token
 export const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
     if (!token) return res.status(401).json({
         success: false,
-        message: "Unauthorized no token"
+        message: "Unauthorized no token-unable to verify"
     });
     try {
         const decode = jwt.verify(token, process.env.JWT_SECRET);
@@ -30,7 +37,7 @@ export const verifyToken = (req, res, next) => {
         });
     }
 }
-//get all user
+//get all user work
 export const getUser = async (req, res) => {
     try {
         const users = await User.find({});
@@ -109,15 +116,19 @@ export const deleteUser = async (req, res) => {
         });
     }
 }
-
+//work
 export const checking = async (req, res) => {
     try {
         const user = await User.findById(req.userId).select("-password");
         if (!user)
             return res.status(400).json({
                 success: false,
-                message:"User not found"
+                message:"User not found via token"
             })
+        res.status(200).json({
+            success: true,
+            user: user
+        });
     } catch (error) {
         console.error(error);
         res.status(400).json({
@@ -141,17 +152,23 @@ export const signUp = async (req, res) => {
                 message: "User already exist"
             });        
         const securePassword = await bcrypt.hash(password, 12);
+        const verifyToken = Math.floor(10000 + Math.random() * 9000).toString();
         const user = new User({
             username,
             email,
-            password: securePassword
+            password: securePassword,
+            verifyingToken: verifyToken,
+            tokenExpire: Date.now() + 24 * 60*60,
         })
         await user.save();
-        const token = generateToken(user._id);
+        generateToken(res, user._id);
         res.status(201).json({
             success: true,
             message: 'User created successfully',
-            token
+            user: {
+                username: user.username,
+                email: user.email
+            }
         });
 
     } catch (error) {
@@ -178,12 +195,15 @@ export const logIn = async (req, res) => {
                 success: false,
                 message: 'Invalid credentials!'
             });
-        const token = generateToken(user._id);
+        generateToken(res, user._id);
         await user.save();
         res.status(200).json({
             success: true,
             message: 'Login successfully',
-            token
+            user: {
+                username: user.username,
+                email: user.email,
+            }
         });
     } catch (error) {
         console.error(error);
@@ -195,6 +215,7 @@ export const logIn = async (req, res) => {
 }
 //work
 export const logOut = async (req, res) => {
+    res.clearCookie("token");
     res.status(200).json({
         success: true,
         message: "Logout successfully"

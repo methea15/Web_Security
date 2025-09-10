@@ -109,19 +109,33 @@ export const checkingUrl = async (request, response) => {
             ...(googleResponse.threatTypes || []),
             ...(virusResponse.threatTypes || []),
         ];
-        const isThreat = allType.length > 0;
         const nonDuplicate = [...new Set(allType)];
-               
+        const isThreat = nonDuplicate.length > 0;   
+   
         const data = {
             url: url,
             status: isThreat ? 'malicious' : 'safe',
-            threat_type: nonDuplicate,
-            details: JSON.stringify({
+            details: {
+                description: isThreat ? 'Potential threat detected' : 'No threat detected',
                 analysis: {
                     protocol: isSecure ? 'HTTPS' : 'HTTP',
-                    trusted: isTrusted
+                    trusted: isTrusted,
+                    domain: {
+                        name: startDomain,
+                        message: isTrusted ? 'Verified domain' : 'Unrecognized domain- exercise with caution'
+                    },
                 },
-            })};
+                source: {
+                    google: {
+                        threatTypes: googleResponse.data?.threat?.threatTypes || [],
+                    },
+                    virusTotal: Array.isArray(virusResponse?.data) ? virusResponse.data.map(item => ({
+                        engine_name: item.engine_name,
+                        category: item.category,
+                        result: item.result
+                    })) : []
+                },
+            }};
         let histories = await UrlCheck.findOneAndUpdate(
             { url },
             data,
@@ -142,7 +156,7 @@ export const checkingUrl = async (request, response) => {
                     official: isTrusted,
                     message: isTrusted ? 'Verified domain' : 'Unrecognized domain- exercise with caution'
                 },
-                threatDetail: allType.map(type => ({
+                threatDetail: nonDuplicate.map(type => ({
                     type: type,
                     description: getDescription(type)
                 })),
@@ -166,67 +180,3 @@ function getDescription(threatTypes) {
     };
     return description[threatTypes] || "Potential security risk";
 }
-
-
-// async function checkCriminal(url) {
-//     try {
-//         const criminalResponse = await axios.post('https://api.criminalip.io/v1/domain/scan',
-//             { url: url, }, { headers: { 'api-key': API_KEY_CIP, 'Content-Type': 'application/json' } },
-//         );
-//         const scanId = criminalResponse.data.scan_id;
-//         await new Promise(resolve => setTimeout(resolve, 25000));
-//         const report = await axios.get(`https://api.criminalip.io/v2/domain/report/${scanId}/`,
-//             { headers: { 'api-key': API_KEY_CIP } });
-//         const threatTypes = new Set();
-//         const summaries = report.data.data || {};
-        
-//         if ( summaries.summary?.url_phishing_prob >= 3 || summaries.summary?.abuse_record > 0)
-//             threatTypes.add('SOCIAL_ENGINEERING');
-
-
-//         return {
-//             isThreat: threatTypes.size > 0,
-//             threatTypes: Array.from(threatTypes),
-//             data: summaries
-            
-//         }
-//     } catch (error) {
-//         console.error("criminal IP error", {
-//             status: error.response?.status,
-//             data: error.response?.data,
-//             message: error.message
-//         });
-//     }
-// }
-//testing
-const testUrls = [
-    // 'https://testsafebrowsing.appspot.com/s/malware.html', // Known malware
-    // 'https://google.com', // Safe
-    'https://testsafebrowsing.appspot.com/s/phishing.html', // Phishing
-];
-
-async function testGoogle() {
-    for (const url of testUrls) {
-        console.log(`\nTesting: ${url}`);
-        try {
-            console.log(`\nTesting-vt`);
-            const result = await checkVirusTotal(url);
-            console.log('Status:', result.isThreat ? '⚠️ Threat' : '✅ Safe');
-            console.log('Threat Types:', result.threatTypes);
-            console.log('Data:', result.data || 'No threats found');
-            // console.log(`\nTesting-gg`);
-            // const result1 = await checkGoogle(url);
-            // console.log('Status:', result1.isThreat ? '⚠️ Threat' : '✅ Safe');
-            // console.log('Threat Types:', result1.threatTypes);
-            // console.log('Data:', result1.data?.threat || 'No threats found');
-            // // console.log(`\nTesting-us`);
-            //  const result2 = await checkCriminal(url);
-            // // console.log('Status:', result2.isThreat ? '⚠️ Threat' : '✅ Safe');
-            //  console.log('Threat Types:', result2.threatTypes);
-            //  console.log('Data:', result2.data || 'No threats found');
-        } catch (error) {
-            console.error('Test failed:', error.message);
-        }
-    }
-}
-//testGoogle();

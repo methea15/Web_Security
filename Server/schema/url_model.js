@@ -16,31 +16,29 @@ const urlSchema = new mongoose.Schema({
         default: Date.now,
     },
     details: {
-        description: String,
+        description: {type: String},
         analysis: {
             protocol: {
                 type: String,
                 enum: ['HTTP', 'HTTPS']
             },
             domain: {
-                name: String, 
-                message: String
+                name: {type: String}, 
+                message: {type:String}
             }
            },
         source: {
             google: {
-                threatTypes: [String],
-                expireTime: Date,
+                threatTypes: [String]
             },
             virusTotal: [{
-                method: String,
-               engine_name: String,
-               category: String,
-               result: String
+                engine_name: String,
+                category: String,
+                result: String
             }]
         },
     }
 });
 
 const UrlCheck = mongoose.model('UrlCheck', urlSchema);
-export default UrlCheck; 
+export default UrlCheck;  

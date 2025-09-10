@@ -15,10 +15,6 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        isVerify: {
-            type: Boolean,
-            default:false
-        },
         verifyingToken:String,
         tokenExpire:Date,
          

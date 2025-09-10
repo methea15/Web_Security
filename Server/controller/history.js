@@ -3,14 +3,23 @@ import UrlCheck from "../schema/url_model.js";
 //history save after getting url
 
 export const contentSchema = (item) => {
-    return item.map(data => ({
-        id: data._id,
-        url: data.url,
-        status: data.status,
-        info: data.details,
-        check_at: data.check_at,
-        action: data._id
-    }))
+    return item.map(data => {
+        let details = data.details;
+        if (typeof details === 'string') {
+            try {
+                details = JSON.parse(details);
+            } catch (error) {
+                details = {};
+            }
+        }    
+        return {
+            id: data._id,
+            url: data.url,
+            status: data.status,
+            checked_at: data.checked_at,
+            full: details
+        }
+    });
 }
 //work
 export const getHistories = async (req, res) => {
